@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Acceptance Probability Calculator</title>
+    <script>
+        // Tiedot kouluista: keskiarvo ja standardipoikkeama
+        const schoolsData = {
+            "Hatanpään lukio": { mean: 7.89, std: 0.12 },
+            "Tampereen teknillisen lukion yleislinja": { mean: 7.76, std: 0.13 },
+            "Sammon keskuslukion yleislinja": { mean: 8.33, std: 0.15 },
+            "Tammerkosken lukion yleislinja": { mean: 8.18, std: 0.14 },
+            "Tampereen klassillisen lukion yleislinja": { mean: 8.53, std: 0.16 },
+            "Tampereen lyseon lukion yleislinja": { mean: 8.63, std: 0.19 },
+            "Kalevan lukio": { mean: 8.42, std: 0.17 },
+            "Tampereen yhteiskoulun lukio": { mean: 8.35, std: 0.14 },
+            "Tampereen yliopiston normaalikoulun lukio": { mean: 8.47, std: 0.18 },
+            "Tampereen Steinerkoulun lukio": { mean: 7.34, std: 0.15 }
+        };
+
+        function calculateProbability(gpa) {
+            const results = [];
+            for (const [school, { mean, std }] of Object.entries(schoolsData)) {
+                const z = (gpa - mean) / std;
+                const prob = 0.5 * (1 + Math.erf(z / Math.sqrt(2))); // Kumulatiivinen normaalijakauman funktio
+                results.push({ school, probability: prob.toFixed(4) }); // Pyöristetään neljään desimaaliin
+            }
+            results.sort((a, b) => b.probability - a.probability); // Järjestetään todennäköisyyden mukaan
+            return results;
+        }
+
+        function showProbabilities() {
+            const gpa = parseFloat(document.getElementById('gpaInput').value);
+            const results = calculateProbability(gpa);
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = ""; // Tyhjennetään aiemmat tulokset
+            results.forEach(result => {
+                const p = document.createElement('p');
+                p.textContent = `${result.school}: ${result.probability}`;
+                resultsContainer.appendChild(p);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>School Acceptance Probability Calculator</h1>
+    <p>Enter your GPA:</p>
+    <input type="number" id="gpaInput" step="0.01" placeholder="Enter your GPA">
+    <button onclick="showProbabilities()">Calculate Probabilities</button>
+    <div id="results"></div>
+</body>
+</html>
