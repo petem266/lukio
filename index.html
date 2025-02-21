@@ -19,18 +19,18 @@
 
     <script>
         const schoolsData = {
-            "Hatanpään lukio": { mean: 7.89, std: 0.12, places: [67, 70, 70, 75, 75], applicants: [51, 39, 47, 53, 52] },
-            "Sammon keskuslukio": { mean: 8.33, std: 0.15, places: [169, 148, 165, 180, 185], applicants: [182, 168, 182, 220, 239] },
-            "Tammerkosken lukio": { mean: 8.18, std: 0.14, places: [180, 180, 185, 185, 195], applicants: [165, 144, 146, 146, 123] },
-            "Tampereen klassillinen lukio": { mean: 8.53, std: 0.16, places: [145, 143, 148, 153, 173], applicants: [129, 142, 138, 138, 123] },
-            "Tampereen lyseon lukio": { mean: 8.63, std: 0.19, places: [115, 115, 120, 120, 180], applicants: [145, 211, 84, 147, 165] },
-            "Tampereen teknillinen lukio": { mean: 7.76, std: 0.13, places: [60, 86, 121, 95, 105], applicants: [42, 47, 58, 69, 77] }
+            "Hatanpään lukio": { mean: 7.89, std: 0.12, places: 75, applicants: 52 },
+            "Sammon keskuslukion yleislinja": { mean: 8.33, std: 0.15, places: 185, applicants: 239 },
+            "Tammerkosken lukion yleislinja": { mean: 8.18, std: 0.14, places: 195, applicants: 123 },
+            "Tampereen klassillinen lukio": { mean: 8.53, std: 0.16, places: 173, applicants: 123 },
+            "Tampereen lyseon lukion yleislinja": { mean: 8.63, std: 0.19, places: 180, applicants: 165 },
+            "Tampereen teknillinen lukio": { mean: 7.76, std: 0.13, places: 105, applicants: 77 }
         };
 
         function calculateProbabilities() {
             const gpa = parseFloat(document.getElementById('gpaInput').value);
             const resultsContainer = document.getElementById('results');
-            resultsContainer.innerHTML = '';
+            resultsContainer.innerHTML = ''; // Clear previous results
 
             if (isNaN(gpa)) {
                 resultsContainer.innerHTML = '<p>Please enter a valid GPA.</p>';
@@ -38,26 +38,29 @@
             }
 
             Object.entries(schoolsData).forEach(([school, { mean, std, places, applicants }]) => {
-                const latestPlace = places[places.length - 1];
-                const latestApplicant = applicants[applicants.length - 1];
                 const z = (gpa - mean) / std;
                 const gpaProbability = 0.5 * (1 + erf(z / Math.sqrt(2)));
-                const acceptanceChance = (gpaProbability * (latestPlace / latestApplicant) * 100).toFixed(2);
+                const acceptanceChance = (gpaProbability * (places / applicants) * 100).toFixed(2);
                 resultsContainer.innerHTML += `<p>${school}: ${acceptanceChance}% (Based on latest data)</p>`;
             });
         }
 
+        // Accurate polynomial approximation of the error function
         function erf(x) {
-            const sign = x >= 0 ? 1 : -1;
-            x = Math.abs(x);
+            // constants for approximation
             const a1 =  0.254829592;
             const a2 = -0.284496736;
             const a3 =  1.421413741;
             const a4 = -1.453152027;
             const a5 =  1.061405429;
             const p  =  0.3275911;
-            const t = 1.0 / (1.0 + p * x);
-            const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+
+            const sign = x >= 0 ? 1 : -1;
+            x = Math.abs(x);
+
+            const t = 1.0 / (1.0 + p*x);
+            const y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t * Math.exp(-x*x);
+
             return sign * y;
         }
     </script>
